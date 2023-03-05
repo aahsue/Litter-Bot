@@ -18,6 +18,7 @@
 #include "sdkconfig.h"
 
 #include "gatt_server.h"
+#include "motor_control.h"
 
 #define GATTS_TAG "LITTER_BOT"
 
@@ -262,8 +263,52 @@ static void gatts_profile_a_event_handler(esp_gatts_cb_event_t event, esp_gatt_i
         if (!param->write.is_prep){
             ESP_LOGI(GATTS_TAG, "GATT_WRITE_EVT, value len %d, value :", param->write.len);
             ESP_LOG_BUFFER_CHAR(GATTS_TAG, param->write.value, param->write.len);
-            // motor switch case
+
+            for (int i = 0; i < param->write.len; i++)
+            {
+                printf("%c", param->write.value[i]);
+            }
+            if (!strcmp((char*) param->write.value, "forward"))
+            {
+                printf("uhhh it thinks im going forward\n");
+                set_motor_dir(MOTOR_LEFT, DIR_FORWARD);
+                set_motor_pwm(MOTOR_LEFT, 500);
+                set_motor_dir(MOTOR_RIGHT, DIR_FORWARD);
+                set_motor_pwm(MOTOR_RIGHT, 500);
+                printf("forwarddd\n");
+            }
+            else if (!strcmp((char*) param->write.value, "left"))
+            {
+                set_motor_dir(MOTOR_LEFT, DIR_FORWARD);
+                set_motor_pwm(MOTOR_LEFT, 500);
+                set_motor_dir(MOTOR_RIGHT, DIR_BACKWARD);
+                set_motor_pwm(MOTOR_RIGHT, 500);
+                printf("lefttt\n");
+            }
+            else if (!strcmp((char*) param->write.value, "right"))
+            {
+                set_motor_dir(MOTOR_LEFT, DIR_BACKWARD);
+                set_motor_pwm(MOTOR_LEFT, 500);
+                set_motor_dir(MOTOR_RIGHT, DIR_FORWARD);
+                set_motor_pwm(MOTOR_RIGHT, 500);
+                printf("righttt\n");
+            }
+            else if (!strcmp((char*) param->write.value, "backwards"))
+            {
+                set_motor_dir(MOTOR_LEFT, DIR_BACKWARD);
+                set_motor_pwm(MOTOR_LEFT, 500);
+                set_motor_dir(MOTOR_RIGHT, DIR_BACKWARD);
+                set_motor_pwm(MOTOR_RIGHT, 500);
+                printf("backwarddd\n");
+            }
+            else if (!strcmp((char*) param->write.value, "stop"))
+            {
+                set_motor_pwm(MOTOR_LEFT, 0);
+                set_motor_pwm(MOTOR_RIGHT, 0);
+                printf("stoppp\n");
+            }
         }
+
         esp_ble_gatts_send_response(gatts_if, param->write.conn_id, param->write.trans_id, ESP_GATT_OK, NULL);
         break;
     }

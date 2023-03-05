@@ -4,29 +4,17 @@
 #include "freertos/FreeRTOS.h"
 #include "freertos/task.h"
 #include "freertos/event_groups.h"
-#include "driver/ledc.h"
+
+#include "motor_control.h"
 
 // motor A = left, motor B = right
-#define LEDC_GPIO 5 // dark blue // ledc: generate PWM signals
-#define MR_FWD_PIN 33 // brown
-#define MR_BACK_PIN 25 // grey
-#define ML_FWD_PIN 26 // white
-#define ML_BACK_PIN 18 // red
-#define ML_SPD_PIN 2 // green
-#define MR_SPD_PIN 4 // black
+#define MR_FWD_PIN 33
+#define MR_BACK_PIN 25
+#define ML_FWD_PIN 26
+#define ML_BACK_PIN 18
+#define ML_SPD_PIN 2
+#define MR_SPD_PIN 4
 static ledc_channel_config_t ledc_channel;
-
-typedef enum {
-	MOTOR_LEFT,
-	MOTOR_RIGHT
-} motor_t;
-
-typedef enum {
-	DIR_FORWARD,
-	DIR_BACKWARD,
-	DIR_STOP_HARD,
-	DIR_STOP_SOFT
-} motor_dir_t;
 
 void init_hw(void);
 bool set_motor_pwm(motor_t motor, uint16_t dc);
@@ -134,27 +122,4 @@ bool set_motor_dir(motor_t motor, motor_dir_t dir) {
     gpio_set_level(back_pin, back_pin_state);
 
     return true;
-}
-
-void motor_task(void *pvParameter)
-{
-    while (1)
-    {
-        //duty cycle in range 0 - 1023??
-        //ledc_set_duty(ledc_channel.speed_mode, ledc_channel.channel, 255);
-        //ledc_update_duty(ledc_channel.speed_mode, ledc_channel.channel);
-        //vTaskDelay(2000 / portTICK_RATE_MS);
-        // ledc_set_duty(ledc_channel.speed_mode, ledc_channel.channel, 120);
-        // ledc_update_duty(ledc_channel.speed_mode, ledc_channel.channel);
-        // vTaskDelay(2000 / portTICK_RATE_MS);
-
-        set_motor_pwm(MOTOR_LEFT, 500);
-        set_motor_dir(MOTOR_LEFT, DIR_FORWARD);
-        vTaskDelay(2000 / portTICK_RATE_MS);
-        set_motor_dir(MOTOR_LEFT, DIR_STOP_SOFT);
-        vTaskDelay(2000 / portTICK_RATE_MS);
-        set_motor_pwm(MOTOR_LEFT, 500);
-        set_motor_dir(MOTOR_LEFT, DIR_BACKWARD);
-        vTaskDelay(2000 / portTICK_RATE_MS);
-    }
 }
